@@ -1,77 +1,111 @@
-# RAG 本地文档问答助手
+# RAG-based Local Document Q&A Assistant
 
-这是一个适合大二学生做课程设计、竞赛作品和 AI/大模型实习面试展示的轻量级 RAG 项目。它支持本地上传 PDF/TXT 文档，完成文本清洗、切分、去重、FAISS 向量化存储，并通过 Streamlit 提供网页问答界面。
+A lightweight, fully local Retrieval-Augmented Generation (RAG) project built for internship portfolios, course projects, and AI/LLM interview demos.
 
-## 1. 技术栈
+This application allows users to upload PDF and TXT files, clean and split the documents, build a persistent FAISS vector index, and ask questions through a Streamlit web interface. The whole pipeline runs on CPU and does not require model training or a GPU.
+
+## Why This Project Is Resume-Friendly
+
+- Built an end-to-end local RAG pipeline from document ingestion to answer generation
+- Implemented document cleaning, chunking, deduplication, vector indexing, and retrieval
+- Used open-source embedding models and FAISS for efficient local semantic search
+- Designed a modular Python codebase that is easy to explain and extend in interviews
+- Delivered a usable Streamlit frontend instead of only backend scripts
+
+## Features
+
+- Batch upload for `PDF` and `TXT` files
+- PDF parsing with `PyPDF2`
+- Text cleaning and duplicate-line removal
+- Recursive chunk splitting with overlap
+- Chunk-level deduplication with hashing
+- Persistent local FAISS vector store
+- Semantic retrieval for user questions
+- Streamlit-based interactive Q&A interface
+- CPU-only local deployment
+
+## Tech Stack
 
 - Python 3.9+
-- LangChain
-- FAISS
 - Streamlit
+- LangChain
+- LangChain Community
+- LangChain Text Splitters
+- FAISS
 - PyPDF2
-- 开源 Embedding 模型（默认：`sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`）
-- CPU 本地运行，无需 GPU
+- Sentence Transformers
 
-## 2. 项目目录结构
+## System Workflow
+
+1. Upload PDF or TXT documents from the Streamlit sidebar
+2. Parse raw text from files and normalize the content
+3. Split documents into overlapping chunks and remove duplicates
+4. Convert chunks into embeddings with an open-source embedding model
+5. Store embeddings in a local FAISS index on disk
+6. Retrieve top relevant chunks for each user query
+7. Synthesize a concise answer and show supporting sources
+
+## Project Structure
 
 ```text
 RAG-based Local Document Q&A Assistant/
-├── app.py
-├── requirements.txt
-├── README.md
-├── data/
-│   ├── uploads/
-│   └── vector_store/
-└── rag_local_qa/
-    ├── __init__.py
-    ├── config.py
-    ├── document_processor.py
-    ├── vector_store.py
-    └── qa_engine.py
+|-- app.py
+|-- requirements.txt
+|-- README.md
+|-- LICENSE
+|-- data/
+|   |-- uploads/
+|   `-- vector_store/
+`-- rag_local_qa/
+    |-- __init__.py
+    |-- config.py
+    |-- document_processor.py
+    |-- qa_engine.py
+    `-- vector_store.py
 ```
 
-## 3. 功能模块说明
+## Core Modules
 
-### 3.1 文档上传
+### `app.py`
 
-- 支持 PDF、TXT 批量上传
-- 上传文件会保存到 `data/uploads/`
+The Streamlit entrypoint. It provides:
 
-### 3.2 文档处理
+- document upload
+- knowledge base rebuild
+- chat interaction
+- source and chunk inspection
 
-- PDF 使用 `PyPDF2` 提取文本
-- TXT 自动尝试 UTF-8 / GBK / GB18030 编码
-- 自动清洗空白字符
-- 自动删除重复行
-- 使用 LangChain 的 `RecursiveCharacterTextSplitter` 进行文本切分
-- 对重复 chunk 做哈希去重
+### `rag_local_qa/document_processor.py`
 
-### 3.3 向量存储
+Handles:
 
-- 使用开源 Embedding 模型将 chunk 向量化
-- 使用 FAISS 建立本地向量索引
-- 索引持久化保存到 `data/vector_store/`
+- PDF and TXT loading
+- text cleaning
+- line deduplication
+- chunk splitting
+- chunk-level deduplication
 
-### 3.4 问答检索
+### `rag_local_qa/vector_store.py`
 
-问答流程如下：
+Responsible for:
 
-1. 用户输入问题
-2. 系统将问题向量化
-3. 在 FAISS 中检索最相关文本块
-4. 对检索结果做轻量级答案组织
-5. 返回回答，并展示来源片段
+- embedding model loading
+- FAISS index creation
+- local persistence
+- similarity search
 
-### 3.5 前端界面
+### `rag_local_qa/qa_engine.py`
 
-- 基于 Streamlit
-- 支持上传文档、重建知识库、清空知识库
-- 支持多轮问答
-- 支持查看来源文档和检索到的 chunk
+Implements:
 
-## 4. 启动步骤
+- query retrieval
+- keyword-aware sentence selection
+- answer synthesis
+- source formatting for the UI
 
-### 4.1 创建虚拟环境
+## Quick Start
+
+### 1. Create a virtual environment
 
 Windows PowerShell:
 
@@ -87,29 +121,29 @@ python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-### 4.2 安装依赖
+### 2. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4.3 启动项目
+### 3. Run the app
 
 ```bash
 streamlit run app.py
 ```
 
-### 4.4 使用流程
+### 4. Use the application
 
-1. 打开浏览器中的 Streamlit 页面
-2. 在左侧上传一个或多个 PDF / TXT 文件
-3. 点击“导入并重建知识库”
-4. 等待向量索引构建完成
-5. 在聊天框输入问题并查看答案
+1. Open the Streamlit page in your browser
+2. Upload one or more PDF or TXT documents
+3. Click `Import and Rebuild Knowledge Base`
+4. Wait for indexing to finish
+5. Ask questions in the chat input
 
-## 5. 可选配置
+## Configuration
 
-可以通过环境变量调整切分和检索参数：
+You can tune chunking and retrieval behavior through environment variables:
 
 ```powershell
 $env:CHUNK_SIZE=800
@@ -119,15 +153,29 @@ $env:EMBEDDING_MODEL_NAME="sentence-transformers/paraphrase-multilingual-MiniLM-
 streamlit run app.py
 ```
 
-## 6. 适合作为实习项目的亮点
+Available variables:
 
-- 模块化结构清晰，容易扩展为更完整的 RAG 系统
-- 具备上传、预处理、向量化、检索、问答、界面展示完整闭环
-- 本地运行，无需训练模型，无需 GPU，适合学生演示和面试讲解
-- 后续可以继续扩展：
-  - 接入本地 LLM（如 Ollama）
-  - 支持 Markdown / Word / 网页解析
-  - 增加多轮对话记忆
-  - 增加重排序（Rerank）模块
+- `CHUNK_SIZE`
+- `CHUNK_OVERLAP`
+- `MIN_CHUNK_LENGTH`
+- `TOP_K`
+- `MAX_ANSWER_SENTENCES`
+- `EMBEDDING_MODEL_NAME`
 
+## Interview Talking Points
 
+If you want to present this project in an interview, you can describe it like this:
+
+> I built a local RAG document Q&A assistant that supports PDF and TXT ingestion, document cleaning, chunking, FAISS-based semantic retrieval, and a Streamlit user interface. The main goal was to implement the full retrieval pipeline in a lightweight, CPU-friendly way and keep the system modular enough for future upgrades such as local LLM generation, reranking, and multi-file knowledge base management.
+
+## Future Improvements
+
+- Integrate a local LLM through Ollama for more natural answer generation
+- Add reranking to improve retrieval precision
+- Support more file types such as Markdown and Word documents
+- Add evaluation metrics for retrieval quality
+- Highlight cited chunks directly inside the interface
+
+## License
+
+This project is released under the MIT License. See the [LICENSE](LICENSE) file for details.

@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 .codex_tmp/
 .streamlit/
+.idea/
 
 data/uploads/*
 !data/uploads/.gitkeep
